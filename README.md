@@ -81,36 +81,37 @@ The same code block can have more than one `except` statement.
    
         post_processing()  # SQLException caught, but not Exception
    
-In these cases, a whole new block is being defined.  Here is the same in legit Python:
+In these cases, the main block is being partitioned.  Here is the same in legit Python:
 
     def process_todo(todo):
         pre_processing()  # no exception handling
    
-		try:
-	        processing()  # Exceptions caught
+        try:
+            processing()  # Exceptions caught
         except SQLException, e:  # covers all lines from here to beginning of next except statement
             raise Exception("Not expected") from e
         except Exception, e:   # catches other exception types
             raise Exception("Oh dear!") from e
    
-		try:
-	        post_processing()  # SQLException caught, but not Exception   
+        try:
+            post_processing()  # SQLException caught, but not Exception   
         except SQLException, e:  # covers a lines to end of method
             raise Exception("Happens, sometimes") from e
    
    
-
-
-
 Other Thoughts
 --------------
 
 I only propose this for replacing `try` blocks that have no `else` or `finally` clause.  I am not limiting my proposal to exception chaining; Anything allowed in `except` clause would be allowed.
 
 
+Q&A
+---
+
+
 ### Postscript `except` Clause?
  
-I could propose adding `except` clauses to each of the major statement types (def, for, if, with, etc…).  which would make the example look like:
+`except` clauses could be added to each of the major statement types (def, for, if, with, etc…).  which would make the example look like:
 
     def process_todo(todo):
         with Timer("todo processing"):
@@ -145,7 +146,7 @@ Would be the same as
        pre_process()
 
        try:
-            process()
+           process()
        except Exception, e:
            print "problem"+unicode(e)
    
@@ -157,16 +158,11 @@ the loop
 In the event that the `except` clause is simply chaining, we could leverage the `__exit__()` method to capture, annotate, chain and re-raise.   
 
     def process_todo(todo):
-		with Except(OverallTodoError("Not expected")):
-	        with Timer("todo processing"):
-	            # pre-processing
-	            for t in todo:
-					with TodoError("oh dear!"):
-		                # do error prone stuff
-	    
-	            # post-processing
-
-
-Thank you for your consideration!
-
-    
+        with Except(OverallTodoError("Not expected")):
+            with Timer("todo processing"):
+                pre_process()
+                for t in todo:
+                    with TodoError("oh dear!"):
+                        process()
+         
+                post_processing()    
