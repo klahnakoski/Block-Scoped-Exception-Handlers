@@ -52,7 +52,7 @@ I would like Python to have a bare `except` statement, which applies from that l
 
 Larger code blocks do a better job of portraying he visual impact of the reduced indentation.  I would admit that some readability is lost because the error handling code precedes the happy path, but I believe the eye will overlook this with little practice.
 
-Multiple `except` statements are allowed.  They apply as if they were used in a `try` statement; matched in the order declared:
+Compound `except` statements are allowed.  They apply as if they were used in a `try` statement; matched in the order declared:
 
     def process_todo(todo):
         pre_processing()  # has no exception handling
@@ -69,14 +69,14 @@ The same code block can have more than one `except` statement.
     def process_todo(todo):
         pre_processing()  # no exception handling
    
-        except SQLException, e:  # covers all lines from here to beginning of next except statement
+        except SQLException, e:  # covers lines from here to beginning of next `except` statement
             raise Exception("Not expected") from e
         except Exception, e:   # catches other exception types
             raise Exception("Oh dear!") from e
    
         processing()  # Exceptions caught
    
-        except SQLException, e:  # covers a lines to end of method
+        except SQLException, e:  # covers lines to end of method
             raise Exception("Happens, sometimes") from e
    
         post_processing()  # SQLException caught, but not Exception
