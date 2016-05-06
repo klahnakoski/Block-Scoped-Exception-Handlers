@@ -35,7 +35,7 @@ Not only is my code dominated by exception handling, the meaningful code is deep
 Solution
 --------
 
-I would like Python to have a bare `except` statement, which applies from that line, to the end of enclosing block.  Here is the same example using the new syntax:
+I would like Python to have a bare `except` statement, which applies from statement, to the end of enclosing block.  Here is the same example using the new syntax:
 
     def process_todo(todo):
         except Exception, e:
@@ -50,7 +50,7 @@ I would like Python to have a bare `except` statement, which applies from that l
                 # do error prone stuff
             # post-processing
 
-Larger code blocks do a better job of portraying he visual impact of the reduced indentation.  I would admit that some readability is lost because the error handling code precedes the happy path, but I believe the eye will overlook this with little practice.
+Larger code blocks do a better job of portraying the visual impact of the reduced indentation.  I would admit that some readability is lost because the error handling code precedes the happy path, but I believe the eye will overlook this with little practice.
 
 Compound `except` statements are allowed.  They apply as if they were used in a `try` statement; matched in the order declared:
 
@@ -162,7 +162,75 @@ In the event that the `except` clause is simply chaining, we could leverage the 
             with Timer("todo processing"):
                 pre_process()
                 for t in todo:
-                    with TodoError("oh dear!"):
+                    with Except(TodoError("oh dear!")):
                         process()
          
-                post_processing()    
+                post_process()    
+
+### Can we `break` out of a loop?
+
+We can leave an exception handler in multiple ways: With `return`, `raise`, `break` or `continue`.  The bare `except` clause is interpreted similarly in all cases, with respect to scope.  The `except` clause is defined in a block, and the exception handler may leave block in any legal way.  
+
+    def process_todo(todo):
+        pre_process()
+        for t in todo:
+            except Exception, e:
+                break  # we can break out of a loop, allowed
+
+            process()
+        post_process()    
+
+Is the same as:
+
+    def process_todo(todo):
+        pre_process()
+        for t in todo:
+			try:
+	            process()
+            except Exception, e:
+                break
+        post_process()    
+
+The scope of `except` is natural with nested loops: 
+
+    def process_todo(todo):
+        pre_process()
+        for t in todo:
+            except Exception, e:
+                break
+			for u, v in t.items():
+	            process()
+        post_process()    
+
+The `break` applies to the outer loop.  This can been seen in the expansion:
+
+    def process_todo(todo):
+        pre_process()
+        for t in todo:
+			try:
+				for u, v in t.items():
+		            process()
+            except Exception, e:
+                break
+        post_process()    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
